@@ -1,0 +1,28 @@
+import express from 'express';
+import {
+    createBranch,
+    getBranch,
+    updateBranch,
+    toggleBranchStatus,
+    listBranches,
+} from '../controllers/admin/branch.controller';
+import {
+    createBranchSchema,
+    updateBranchSchema,
+    getBranchSchema,
+    listBranchesSchema,
+} from '../validations/branch.validation';
+import { validate } from '../middleware/validation.middleware';
+import { authenticate, authorize } from '../middleware/auth.middleware';
+
+const router = express.Router();
+
+router.use(authenticate, authorize(['ADMIN']));
+
+router.post('/', validate(createBranchSchema), createBranch);
+router.get('/', validate(listBranchesSchema), listBranches);
+router.get('/:id', validate(getBranchSchema), getBranch);
+router.patch('/:id', validate(updateBranchSchema), updateBranch);
+router.patch('/:id/status', validate(getBranchSchema), toggleBranchStatus);
+
+export default router;

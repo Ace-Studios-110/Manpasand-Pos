@@ -1,0 +1,25 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.refundSaleSchema = exports.createSaleSchema = void 0;
+const zod_1 = require("zod");
+const saleItemSchema = zod_1.z.object({
+    productId: zod_1.z.string(),
+    quantity: zod_1.z.number().int().min(1),
+    price: zod_1.z.number().nonnegative(),
+});
+const createSaleSchema = zod_1.z.object({
+    body: zod_1.z.object({
+        branchId: zod_1.z.string().min(1),
+        customerId: zod_1.z.string().optional(),
+        paymentMethod: zod_1.z.enum(["CASH", "CARD", "MOBILE_MONEY", "BANK_TRANSFER", "CREDIT"]),
+        items: zod_1.z.array(saleItemSchema).min(1),
+    }),
+});
+exports.createSaleSchema = createSaleSchema;
+const refundSaleSchema = zod_1.z.object({
+    body: zod_1.z.object({
+        reason: zod_1.z.string().optional(),
+    }),
+});
+exports.refundSaleSchema = refundSaleSchema;
+//# sourceMappingURL=sale.validation.js.map
