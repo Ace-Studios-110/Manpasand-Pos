@@ -31,6 +31,8 @@ import { Notifications } from "@/components/notifications"
 import { Branches } from "./branches"
 import Inventory from "./inventory"
 import { Stocks } from "./Stocks"
+import { Sales } from "./sales"
+import Orders from "./orders"
 
 interface DashboardProps {
   onLogout: () => void
@@ -44,7 +46,9 @@ export function Dashboard({ onLogout }: DashboardProps) {
       case "dashboard":
         return <DashboardHome />
       case "new-sale":
-        return <NewSale />
+        return <Sales />
+      case "orders":
+        return <Orders />
       case "sales-history":
         return <SalesHistory />
       case "returns":

@@ -35,6 +35,7 @@ import {
   FileText,
   Pause,
   TagIcon as PriceTag,
+  ListOrdered,
 } from "lucide-react"
 import { useState } from "react"
 
@@ -72,8 +73,9 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
       label: "Sales & Transactions",
       expandable: true,
       items: [
-        { id: "new-sale", label: "New Sale", icon: ShoppingCart },
+        { id: "new-sale", label: "Sales", icon: ShoppingCart },
         { id: "sales-history", label: "Sales History", icon: History },
+        { id: "orders", label: "Orders", icon: ListOrdered },
         { id: "returns", label: "Returns & Refunds", icon: RotateCcw },
         { id: "reservations", label: "Reservations", icon: Calendar },
         { id: "layaway-holds", label: "Layaway & Holds", icon: Pause },

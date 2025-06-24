@@ -34,7 +34,7 @@ import {
   Loader2,
 } from "lucide-react";
 import apiClient from "@/lib/apiClient";
-export const API_BASE = "https://backend.manpasandstore.com/api/v1";
+import { API_BASE } from "@/config/constants";
 
 interface Product {
   id: string;
