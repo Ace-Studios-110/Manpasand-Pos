@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import apiClient from "@/lib/apiClient";
 import { API_BASE } from "@/config/constants";
+import { useToast } from "@/hooks/use-toast";
 
 interface Product {
   id: string;
@@ -66,6 +67,7 @@ interface Movement {
 }
 
 export function Stocks() {
+  const { toast } = useToast();
   // Data lists
   const [products, setProducts] = useState<Product[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
@@ -78,6 +80,7 @@ export function Stocks() {
   const [isLoading, setIsLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isAdjusting, setIsAdjusting] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // Dialog state
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -99,6 +102,7 @@ export function Stocks() {
   // 1) Fetch products & branches on mount
   useEffect(() => {
     const loadMeta = async () => {
+      setIsInitialLoading(true);
       try {
         const [pRes, bRes] = await Promise.all([
           apiClient.get(`${API_BASE}/products?limit=100`),
@@ -106,8 +110,22 @@ export function Stocks() {
         ]);
         setProducts(pRes.data.data);
         setBranches(bRes.data.data);
-      } catch (e) {
+        toast({
+          title: "Success",
+          description: "Stock metadata loaded successfully",
+        });
+      } catch (e: any) {
         console.error(e);
+        let errorMessage = "Failed to load stock metadata";
+        if (e.response?.data?.message) errorMessage = e.response.data.message;
+        else if (e.message) errorMessage = e.message;
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } finally {
+        setIsInitialLoading(false);
       }
     };
     loadMeta();
@@ -133,8 +151,20 @@ export function Stocks() {
         ]);
         setStocks(sRes.data.data);
         setHistory(hRes.data.data);
-      } catch (e) {
+        toast({
+          title: "Success",
+          description: "Stock data loaded successfully",
+        });
+      } catch (e: any) {
         console.error(e);
+        let errorMessage = "Failed to load stock data";
+        if (e.response?.data?.message) errorMessage = e.response.data.message;
+        else if (e.message) errorMessage = e.message;
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -167,8 +197,20 @@ export function Stocks() {
       // reload
       const res = await apiClient.get(`${API_BASE}/stock`, { params: { branchId: branchFilter } });
       setStocks(res.data.data);
-    } catch (e) {
+      toast({
+        title: "Success",
+        description: "Stock added successfully",
+      });
+    } catch (e: any) {
       console.error(e);
+      let errorMessage = "Failed to add stock";
+      if (e.response?.data?.message) errorMessage = e.response.data.message;
+      else if (e.message) errorMessage = e.message;
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsAdding(false);
     }
@@ -190,12 +232,37 @@ export function Stocks() {
       setStocks(res.data.data);
       const hRes = await apiClient.get(`${API_BASE}/stock/history`, { params: { branchId: branchFilter } });
       setHistory(hRes.data.data);
-    } catch (e) {
+      toast({
+        title: "Success",
+        description: "Stock adjusted successfully",
+      });
+    } catch (e: any) {
       console.error(e);
+      let errorMessage = "Failed to adjust stock";
+      if (e.response?.data?.message) errorMessage = e.response.data.message;
+      else if (e.message) errorMessage = e.message;
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsAdjusting(false);
     }
   };
+
+  if (isInitialLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <Loader2 className="animate-spin h-12 w-12 text-gray-500 mx-auto mb-4" />
+            <p className="text-gray-600">Loading stock data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

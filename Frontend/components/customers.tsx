@@ -36,9 +36,12 @@ import {
   Mail,
   MapPin,
   Loader2,
+  DollarSign,
+  UserCheck,
 } from "lucide-react";
 import apiClient from "@/lib/apiClient";
 import { API_BASE } from "@/config/constants";
+import { useToast } from "@/hooks/use-toast";
 
 interface Customer {
   id: string;
@@ -51,10 +54,14 @@ interface Customer {
 }
 
 export function Customers() {
+  const { toast } = useToast();
+  
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newCustomer, setNewCustomer] = useState<Partial<Customer>>({});
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
@@ -66,15 +73,35 @@ export function Customers() {
       const res = await apiClient.get(`${API_BASE}/user/customer`);
       // API shape: { success, message, data: Customer[] }
       setCustomers(res.data.data);
-    } catch (err) {
+      toast({
+        title: "Success",
+        description: "Customers loaded successfully",
+      });
+    } catch (err: any) {
       console.error(err);
+      let errorMessage = "Failed to load customers";
+      if (err.response?.data?.message) errorMessage = err.response.data.message;
+      else if (err.message) errorMessage = err.message;
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCustomers();
+    const loadData = async () => {
+      setIsInitialLoading(true);
+      try {
+        await fetchCustomers();
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+    loadData();
   }, []);
 
   // 2) Create customer (email only)
@@ -87,29 +114,81 @@ export function Customers() {
       });
       setNewCustomer({});
       setIsAddDialogOpen(false);
+      toast({
+        title: "Success",
+        description: "Customer created successfully",
+      });
       fetchCustomers();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      let errorMessage = "Failed to create customer";
+      if (err.response?.data?.message) errorMessage = err.response.data.message;
+      else if (err.message) errorMessage = err.message;
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsAdding(false);
     }
   };
 
-  // Local edit / delete (unchanged)
-  const handleEditCustomer = () => {
-    if (editingCustomer) {
-      setCustomers((prev) =>
-        prev.map((c) =>
-          c.id === editingCustomer.id ? editingCustomer : c
-        )
-      );
+  // Edit customer
+  const handleEditCustomer = async () => {
+    if (!editingCustomer) return;
+    setIsEditing(true);
+    try {
+      await apiClient.patch(`${API_BASE}/user/customer/${editingCustomer.id}`, {
+        email: editingCustomer.email,
+        name: editingCustomer.name,
+        phone_number: editingCustomer.phone_number,
+        address: editingCustomer.address,
+      });
       setEditingCustomer(null);
+      toast({
+        title: "Success",
+        description: "Customer updated successfully",
+      });
+      fetchCustomers();
+    } catch (err: any) {
+      console.error(err);
+      let errorMessage = "Failed to update customer";
+      if (err.response?.data?.message) errorMessage = err.response.data.message;
+      else if (err.message) errorMessage = err.message;
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsEditing(false);
     }
   };
-  const handleDeleteCustomer = (id: string) =>
-    setCustomers((prev) => prev.filter((c) => c.id !== id));
 
-  // Stats (total, active, revenue — revenue = 0 since API doesn’t return it)
+  // Delete customer
+  const handleDeleteCustomer = async (id: string) => {
+    try {
+      await apiClient.delete(`${API_BASE}/user/customer/${id}`);
+      toast({
+        title: "Success",
+        description: "Customer deleted successfully",
+      });
+      fetchCustomers();
+    } catch (err: any) {
+      console.error(err);
+      let errorMessage = "Failed to delete customer";
+      if (err.response?.data?.message) errorMessage = err.response.data.message;
+      else if (err.message) errorMessage = err.message;
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Stats (total, active, revenue — revenue = 0 since API doesn't return it)
   const activeCount = customers.filter((c) => c.is_active).length;
   const totalRevenue = 0;
 
@@ -120,9 +199,22 @@ export function Customers() {
       .includes(searchTerm.toLowerCase())
   );
 
+  if (isInitialLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <Loader2 className="animate-spin h-12 w-12 text-gray-500 mx-auto mb-4" />
+            <p className="text-gray-600">Loading customers data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
-      {/* — Header & Add Dialog (original markup) — */}
+      {/* Header & Add Dialog */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
@@ -157,17 +249,21 @@ export function Customers() {
                       email: e.target.value,
                     })
                   }
+                  placeholder="Enter customer email"
                 />
               </div>
               <Button
                 onClick={handleAddCustomer}
                 className="w-full"
-                disabled={isAdding}
+                disabled={isAdding || !newCustomer.email}
               >
                 {isAdding ? (
-                  <Loader2 className="animate-spin h-4 w-4" />
+                  <>
+                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                    Creating Customer...
+                  </>
                 ) : (
-                  "Create"
+                  "Create Customer"
                 )}
               </Button>
             </div>
@@ -175,7 +271,7 @@ export function Customers() {
         </Dialog>
       </div>
 
-      {/* — Stats Cards (unchanged) — */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -195,10 +291,10 @@ export function Customers() {
             <CardTitle className="text-sm font-medium">
               Active Customers
             </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <UserCheck className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-green-600">
               {activeCount}
             </div>
           </CardContent>
@@ -208,17 +304,17 @@ export function Customers() {
             <CardTitle className="text-sm font-medium">
               Total Revenue
             </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-blue-600">
               ${totalRevenue.toFixed(2)}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* — Search (unchanged) — */}
+      {/* Search */}
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
         <Input
@@ -229,15 +325,23 @@ export function Customers() {
         />
       </div>
 
-      {/* — Table with Loader inserted — */}
+      {/* Table with Loader */}
       <Card>
         <CardHeader>
-          <CardTitle>Customers</CardTitle>
+          <CardTitle>Customers ({filteredCustomers.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="flex justify-center py-10">
-              <Loader2 className="animate-spin h-8 w-8 text-gray-500" />
+              <div className="text-center">
+                <Loader2 className="animate-spin h-8 w-8 text-gray-500 mx-auto mb-2" />
+                <p className="text-gray-600">Loading customers...</p>
+              </div>
+            </div>
+          ) : filteredCustomers.length === 0 ? (
+            <div className="text-center py-10">
+              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">No customers found</p>
             </div>
           ) : (
             <Table>
@@ -252,17 +356,26 @@ export function Customers() {
               <TableBody>
                 {filteredCustomers.map((customer) => (
                   <TableRow key={customer.id}>
-                   
                     <TableCell>
                       <div className="space-y-1">
                         <div className="flex items-center text-sm">
                           <Mail className="h-3 w-3 mr-1" />
                           {customer.email}
                         </div>
+                        {customer.name && (
+                          <div className="flex items-center text-sm text-gray-500">
+                            <Users className="h-3 w-3 mr-1" />
+                            {customer.name}
+                          </div>
+                        )}
+                        {customer.phone_number && (
+                          <div className="flex items-center text-sm text-gray-500">
+                            <Phone className="h-3 w-3 mr-1" />
+                            {customer.phone_number}
+                          </div>
+                        )}
                       </div>
                     </TableCell>
-                  
-                  
                     <TableCell>
                       {customer.created_at.split("T")[0]}
                     </TableCell>
@@ -274,10 +387,10 @@ export function Customers() {
                         className={
                           customer.is_active
                             ? "bg-green-100 text-green-800"
-                            : ""
+                            : "bg-red-100 text-red-800"
                         }
                       >
-                        {customer.is_active ? "active" : "inactive"}
+                        {customer.is_active ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -311,7 +424,7 @@ export function Customers() {
         </CardContent>
       </Card>
 
-      {/* — Edit Dialog (unchanged) — */}
+      {/* Edit Dialog */}
       <Dialog
         open={!!editingCustomer}
         onOpenChange={() => setEditingCustomer(null)}
@@ -336,13 +449,64 @@ export function Customers() {
                   }
                 />
               </div>
-              
-             
+              <div>
+                <Label htmlFor="edit-name">Name</Label>
+                <Input
+                  id="edit-name"
+                  type="text"
+                  value={editingCustomer.name || ""}
+                  onChange={(e) =>
+                    setEditingCustomer({
+                      ...editingCustomer,
+                      name: e.target.value,
+                    })
+                  }
+                  placeholder="Enter customer name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-phone">Phone Number</Label>
+                <Input
+                  id="edit-phone"
+                  type="tel"
+                  value={editingCustomer.phone_number || ""}
+                  onChange={(e) =>
+                    setEditingCustomer({
+                      ...editingCustomer,
+                      phone_number: e.target.value,
+                    })
+                  }
+                  placeholder="Enter phone number"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-address">Address</Label>
+                <Input
+                  id="edit-address"
+                  type="text"
+                  value={editingCustomer.address || ""}
+                  onChange={(e) =>
+                    setEditingCustomer({
+                      ...editingCustomer,
+                      address: e.target.value,
+                    })
+                  }
+                  placeholder="Enter address"
+                />
+              </div>
               <Button
                 onClick={handleEditCustomer}
                 className="w-full"
+                disabled={isEditing}
               >
-                Update Customer
+                {isEditing ? (
+                  <>
+                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                    Updating Customer...
+                  </>
+                ) : (
+                  "Update Customer"
+                )}
               </Button>
             </div>
           )}
