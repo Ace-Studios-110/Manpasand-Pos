@@ -87,6 +87,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
       items: [
         { id: "inventory", label: "Products", icon: Package },
         { id: "categories", label: "Categories", icon: Grid3X3 },
+        { id: "branches", label: "Branches", icon: Grid3X3 },
         { id: "suppliers", label: "Suppliers", icon: Truck },
         { id: "purchase-orders", label: "Purchase Orders", icon: FileText },
         { id: "pricing", label: "Pricing & Margins", icon: PriceTag },

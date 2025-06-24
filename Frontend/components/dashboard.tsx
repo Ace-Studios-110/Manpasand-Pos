@@ -29,6 +29,7 @@ import { Reservations } from "@/components/reservations"
 import { LayawayHolds } from "@/components/layaway-holds"
 import { Pricing } from "@/components/pricing"
 import { Notifications } from "@/components/notifications"
+import { Branches } from "./branches"
 
 interface DashboardProps {
   onLogout: () => void
@@ -55,6 +56,8 @@ export function Dashboard({ onLogout }: DashboardProps) {
         return <Inventory />
       case "categories":
         return <Categories />
+      case "branches":
+        return <Branches />
       case "suppliers":
         return <Suppliers />
       case "purchase-orders":
