@@ -99,7 +99,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
       expandable: true,
       items: [
         { id: "customers", label: "Customers", icon: Users },
-        { id: "loyalty", label: "Loyalty Program", icon: Gift },
+        { id: "loyalty", label: "Stocks", icon: Gift },
         { id: "gift-cards", label: "Gift Cards", icon: CreditCard },
         { id: "employees", label: "Employees", icon: UserCheck },
         { id: "shifts", label: "Shift Management", icon: Clock },

@@ -4,7 +4,6 @@ import { useState } from "react"
 import { Sidebar } from "@/components/sidebar"
 import { DashboardHome } from "@/components/dashboard-home"
 import { NewSale } from "@/components/new-sale"
-import { Inventory } from "@/components/inventory"
 import { Customers } from "@/components/customers"
 import { Reports } from "@/components/reports"
 import { Settings } from "@/components/settings"
@@ -30,6 +29,8 @@ import { LayawayHolds } from "@/components/layaway-holds"
 import { Pricing } from "@/components/pricing"
 import { Notifications } from "@/components/notifications"
 import { Branches } from "./branches"
+import Inventory from "./inventory"
+import { Stocks } from "./Stocks"
 
 interface DashboardProps {
   onLogout: () => void
@@ -67,7 +68,7 @@ export function Dashboard({ onLogout }: DashboardProps) {
       case "customers":
         return <Customers />
       case "loyalty":
-        return <Loyalty />
+        return <Stocks />
       case "gift-cards":
         return <GiftCards />
       case "employees":
