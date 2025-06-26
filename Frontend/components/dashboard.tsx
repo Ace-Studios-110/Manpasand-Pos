@@ -9,7 +9,7 @@ import { Reports } from "@/components/reports"
 import { Settings } from "@/components/settings"
 import { SalesHistory } from "@/components/sales-history"
 import { EmployeeManagement } from "@/components/employee-management"
-import { Suppliers } from "@/components/suppliers"
+
 import { Categories } from "@/components/categories"
 import { Promotions } from "@/components/promotions"
 import { CashRegister } from "@/components/cash-register"
@@ -33,6 +33,12 @@ import Inventory from "./inventory"
 import { Stocks } from "./Stocks"
 import { Sales } from "./sales"
 import Orders from "./orders"
+import Subcategories from "./sub-categories"
+import Units from "./Units"
+import Suppliers from "./suppliers"
+import Brands from "./Brands"
+import Colors from "./color"
+import Sizes from "./sizes"
 
 interface DashboardProps {
   onLogout: () => void
@@ -49,8 +55,16 @@ export function Dashboard({ onLogout }: DashboardProps) {
         return <Sales />
       case "orders":
         return <Orders />
+      case "units":
+        return <Units />
       case "sales-history":
         return <SalesHistory />
+      case "brand":
+        return <Brands />
+      case "colors":
+        return <Colors/>
+      case  "sizes":
+        return <Sizes/>
       case "returns":
         return <Returns />
       case "reservations":
@@ -61,6 +75,8 @@ export function Dashboard({ onLogout }: DashboardProps) {
         return <Inventory />
       case "categories":
         return <Categories />
+      case "sub-categories":
+        return <Subcategories />
       case "branches":
         return <Branches />
       case "suppliers":

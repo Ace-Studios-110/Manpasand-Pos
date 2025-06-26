@@ -36,6 +36,7 @@ import {
   Pause,
   TagIcon as PriceTag,
   ListOrdered,
+  StoreIcon,
 } from "lucide-react"
 import { useState } from "react"
 
@@ -76,6 +77,7 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
         { id: "new-sale", label: "Sales", icon: ShoppingCart },
         { id: "sales-history", label: "Sales History", icon: History },
         { id: "orders", label: "Orders", icon: ListOrdered },
+        { id: "suppliers", label: "Suppliers", icon: Truck },
         { id: "returns", label: "Returns & Refunds", icon: RotateCcw },
         { id: "reservations", label: "Reservations", icon: Calendar },
         { id: "layaway-holds", label: "Layaway & Holds", icon: Pause },
@@ -89,8 +91,12 @@ export function Sidebar({ activeTab, setActiveTab, onLogout }: SidebarProps) {
       items: [
         { id: "inventory", label: "Products", icon: Package },
         { id: "categories", label: "Categories", icon: Grid3X3 },
+        { id: "sub-categories", label: "Sub-Categories", icon: Grid3X3 },
         { id: "branches", label: "Branches", icon: Grid3X3 },
-        { id: "suppliers", label: "Suppliers", icon: Truck },
+        { id: "units", label: "Units", icon: Package },
+        {id: "brand" , label: "Brands", icon: StoreIcon},
+        {id: "colors" , label: "Colors", icon: Package},
+        {id : "sizes" , label: "Sizes", icon: Package},
         { id: "purchase-orders", label: "Purchase Orders", icon: FileText },
         { id: "pricing", label: "Pricing & Margins", icon: PriceTag },
       ],
