@@ -4,12 +4,33 @@ import React, { useState, useEffect, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus, Loader2, Edit, Eye, ToggleRight, ToggleLeft } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Search,
+  Plus,
+  Loader2,
+  Edit,
+  Eye,
+  ToggleRight,
+  ToggleLeft,
+} from "lucide-react";
 import apiClient from "@/lib/apiClient";
-export const API_BASE = "https://backend.manpasandstore.com/api/v1";
+import { API_BASE } from "@/config/constants";
 
 interface Subcategory {
   id: string;
@@ -34,7 +55,11 @@ const Subcategories: React.FC = () => {
   const [current, setCurrent] = useState<Subcategory | null>(null);
 
   // form.image now holds base64 string or URL
-  const [form, setForm] = useState({ name: "", display_on_pos: true, image: "" });
+  const [form, setForm] = useState({
+    name: "",
+    display_on_pos: true,
+    image: "",
+  });
 
   useEffect(() => {
     fetchList();
@@ -43,7 +68,9 @@ const Subcategories: React.FC = () => {
   const fetchList = async (q: string = search) => {
     setLoading(true);
     try {
-      const res = await apiClient.get(`${API_BASE}/subcategories`, { params: { search: q } });
+      const res = await apiClient.get(`${API_BASE}/subcategories`, {
+        params: { search: q },
+      });
       setList(res.data.data);
     } catch (e) {
       console.error(e);
@@ -68,7 +95,11 @@ const Subcategories: React.FC = () => {
   };
   const openEdit = (sub: Subcategory) => {
     setCurrent(sub);
-    setForm({ name: sub.name, display_on_pos: sub.display_on_pos, image: sub.image || "" });
+    setForm({
+      name: sub.name,
+      display_on_pos: sub.display_on_pos,
+      image: sub.image || "",
+    });
     setEditOpen(true);
   };
 
@@ -79,7 +110,7 @@ const Subcategories: React.FC = () => {
     const reader = new FileReader();
     reader.onload = () => {
       const base64 = reader.result as string;
-      setForm(f => ({ ...f, image: base64 }));
+      setForm((f) => ({ ...f, image: base64 }));
     };
     reader.readAsDataURL(file);
   };
@@ -130,7 +161,10 @@ const Subcategories: React.FC = () => {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Subcategories</h1>
-        <Button onClick={openAdd} className="flex items-center space-x-2 bg-indigo-600 text-white hover:bg-indigo-700">
+        <Button
+          onClick={openAdd}
+          className="flex items-center space-x-2 bg-indigo-600 text-white hover:bg-indigo-700"
+        >
           <Plus className="h-5 w-5" />
           <span>New</span>
         </Button>
@@ -141,13 +175,15 @@ const Subcategories: React.FC = () => {
         <Input
           placeholder="Search by name or code"
           value={search}
-          onChange={e => handleSearchChange(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           className="pl-10"
         />
       </div>
 
       <Card>
-        <CardHeader><CardTitle>List</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>List</CardTitle>
+        </CardHeader>
         <CardContent>
           {loading ? (
             <div className="flex justify-center py-10">
@@ -166,24 +202,40 @@ const Subcategories: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {list.map(sub => (
+                {list.map((sub) => (
                   <TableRow key={sub.id} className="hover:bg-gray-50">
                     <TableCell>{sub.code}</TableCell>
                     <TableCell>{sub.name}</TableCell>
-                    <TableCell>{sub.display_on_pos ? 'Yes' : 'No'}</TableCell>
+                    <TableCell>{sub.display_on_pos ? "Yes" : "No"}</TableCell>
                     <TableCell>{sub.product_count}</TableCell>
                     <TableCell>
-                      {sub.is_active ? <ToggleRight className="text-green-500" /> : <ToggleLeft className="text-red-500" />}
+                      {sub.is_active ? (
+                        <ToggleRight className="text-green-500" />
+                      ) : (
+                        <ToggleLeft className="text-red-500" />
+                      )}
                     </TableCell>
                     <TableCell className="flex space-x-2">
-                      <Button size="sm" variant="outline" onClick={() => fetchDetail(sub.id)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => fetchDetail(sub.id)}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => openEdit(sub)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openEdit(sub)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => toggleStatus(sub.id)}>
-                        {sub.is_active ? 'Disable' : 'Enable'}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => toggleStatus(sub.id)}
+                      >
+                        {sub.is_active ? "Disable" : "Enable"}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -196,22 +248,44 @@ const Subcategories: React.FC = () => {
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Create Subcategory</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Create Subcategory</DialogTitle>
+          </DialogHeader>
           <div className="space-y-4">
             <div>
               <Label htmlFor="name">Name</Label>
-              <Input id="name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+              <Input
+                id="name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
             </div>
             <div>
               <Label htmlFor="image">Image File</Label>
-              <input type="file" id="image" accept="image/*" onChange={handleFileChange} />
+              <input
+                type="file"
+                id="image"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
             </div>
             <div className="flex items-center space-x-2">
-              <input id="pos" type="checkbox" checked={form.display_on_pos} onChange={e => setForm({ ...form, display_on_pos: e.target.checked })} />
+              <input
+                id="pos"
+                type="checkbox"
+                checked={form.display_on_pos}
+                onChange={(e) =>
+                  setForm({ ...form, display_on_pos: e.target.checked })
+                }
+              />
               <Label htmlFor="pos">Display on POS</Label>
             </div>
-            <Button onClick={() => submitForm()} className="w-full" disabled={submitting}>
-              {submitting ? <Loader2 className="animate-spin" /> : 'Create'}
+            <Button
+              onClick={() => submitForm()}
+              className="w-full"
+              disabled={submitting}
+            >
+              {submitting ? <Loader2 className="animate-spin" /> : "Create"}
             </Button>
           </div>
         </DialogContent>
@@ -219,22 +293,44 @@ const Subcategories: React.FC = () => {
 
       <Dialog open={editOpen} onOpenChange={() => setEditOpen(false)}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Edit Subcategory</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Edit Subcategory</DialogTitle>
+          </DialogHeader>
           <div className="space-y-4">
             <div>
               <Label htmlFor="ename">Name</Label>
-              <Input id="ename" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+              <Input
+                id="ename"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
             </div>
             <div>
               <Label htmlFor="eimage">Image File</Label>
-              <input type="file" id="eimage" accept="image/*" onChange={handleFileChange} />
+              <input
+                type="file"
+                id="eimage"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
             </div>
             <div className="flex items-center space-x-2">
-              <input id="epos" type="checkbox" checked={form.display_on_pos} onChange={e => setForm({ ...form, display_on_pos: e.target.checked })} />
+              <input
+                id="epos"
+                type="checkbox"
+                checked={form.display_on_pos}
+                onChange={(e) =>
+                  setForm({ ...form, display_on_pos: e.target.checked })
+                }
+              />
               <Label htmlFor="epos">Display on POS</Label>
             </div>
-            <Button onClick={() => submitForm(current?.id)} className="w-full" disabled={submitting}>
-              {submitting ? <Loader2 className="animate-spin" /> : 'Update'}
+            <Button
+              onClick={() => submitForm(current?.id)}
+              className="w-full"
+              disabled={submitting}
+            >
+              {submitting ? <Loader2 className="animate-spin" /> : "Update"}
             </Button>
           </div>
         </DialogContent>
@@ -242,14 +338,31 @@ const Subcategories: React.FC = () => {
 
       <Dialog open={detailOpen} onOpenChange={() => setDetailOpen(false)}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Subcategory Details</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Subcategory Details</DialogTitle>
+          </DialogHeader>
           {current && (
             <div className="space-y-2">
-              <p><strong>Code:</strong> {current.code}</p>
-              <p><strong>Name:</strong> {current.name}</p>
-              <p><strong>Display on POS:</strong> {current.display_on_pos ? 'Yes' : 'No'}</p>
-              <p><strong>Products:</strong> {current.product_count}</p>
-              {current.image && <img src={current.image} alt={current.name} className="w-full h-32 object-cover rounded" />}
+              <p>
+                <strong>Code:</strong> {current.code}
+              </p>
+              <p>
+                <strong>Name:</strong> {current.name}
+              </p>
+              <p>
+                <strong>Display on POS:</strong>{" "}
+                {current.display_on_pos ? "Yes" : "No"}
+              </p>
+              <p>
+                <strong>Products:</strong> {current.product_count}
+              </p>
+              {current.image && (
+                <img
+                  src={current.image}
+                  alt={current.name}
+                  className="w-full h-32 object-cover rounded"
+                />
+              )}
             </div>
           )}
         </DialogContent>

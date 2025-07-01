@@ -12,8 +12,9 @@ import { Search, Plus, Loader2, Edit, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { API_BASE } from "@/config/constants";
 
-export const API_BASE = "https://backend.manpasandstore.com/api/v1";
+
 
 interface Unit {
   id: string;
