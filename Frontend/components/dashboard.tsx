@@ -125,6 +125,8 @@ export function Dashboard({ onLogout }: DashboardProps) {
     }
   }
 
+  const formatCurrency = (amount: number) => `Rs ${amount.toFixed(2)}`
+
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={onLogout} />
